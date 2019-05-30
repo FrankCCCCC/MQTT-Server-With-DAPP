@@ -38,11 +38,13 @@
       <table class="table">
           <thead>
               <tr>
+                <th scope="col">Check</th>
                 <th scope="col">Time</th>
                 <th scope="col">Humidity</th>
                 <th scope="col">Temperature</th>
                 <th scope="col">PM2.5</th>
                 <th scope="col">Luminous</th>
+                <th scope="col">Raw Data Hash</th>
               </tr>
             </thead>
             <tbody id="messages">
@@ -54,6 +56,7 @@
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script type="text/javascript" src="./node_modules/crypto-js/crypto-js.js"></script>
     <script>
       $(document).ready(function(){
         if (typeof web3 !== 'undefined') {
@@ -131,7 +134,10 @@
         // myContract.defaults({
         //   gasLimit: "100000"
         // });
+
         var instructorEvent = info.Instructor();
+
+        var recordList = [];
 
         var socket = io('http://localhost:4000');
         $('form').submit(function(){
@@ -141,21 +147,34 @@
         });
         socket.on('chat message', function(msg){
           //$('#messages').append($('<li>').text(msg));
-          info.setInfo("msg", 0);
+          var hash = CryptoJS.SHA256(msg).toString();
+          info.setInfo(hash, 0);
           var dataObj = JSON.parse(msg);
-          //console.log(dataObj);
-          $('#messages').append("<tr><th scope=\"row\">"+dataObj.time+"</th><th>" + dataObj.humid + "</th><th>" + dataObj.temp + "</th><th>" + dataObj.air + "</th><th>" + dataObj.luminous + "</th></tr>");
-          window.scrollTo(0, document.body.scrollHeight);
+          dataObj.hash = hash;
+          recordList.push(dataObj);
+          console.log(dataObj);
+          // $('#messages').append("<tr><th scope=\"row\">"+dataObj.time+"</th><th>" + dataObj.humid + "</th><th>" + dataObj.temp + "</th><th>" + dataObj.air + "</th><th>" + dataObj.luminous + "</th><th>" + dataObj.hash + "</th></tr>");
+          // window.scrollTo(0, document.body.scrollHeight);
         });
 
         instructorEvent.watch(function(error, result){
             if (!error)
                 {
-                  //var dataObj = JSON.parse(result.args.name);
                   console.log(result.args.name);
-                  //$('#messages').append("<tr><th scope=\"row\">"+dataObj.time+"</th><th>" + dataObj.humid + "</th><th>" + dataObj.temp + "</th><th>" + dataObj.air + "</th><th>" + dataObj.luminous + "</th></tr>");
-                  //window.scrollTo(0, document.body.scrollHeight);
-                  //$("#info").html(result.args.name + ' (' + result.args.age + ' years old)');
+                  //var dataObj = JSON.parse(result.args.name);
+                  var flag = 1;
+                  for(var i=recordList.length-1; i>=0; i--){
+                    if(result.args.name === recordList[i].hash){
+                      $('#messages').append("<tr><th scope=\"row\"><img src=\"correct.svg\" width=\"50%\" height=\"10%\"></th><th>"+recordList[i].time+"</th><th>" + recordList[i].humid + "</th><th>" + recordList[i].temp + "</th><th>" + recordList[i].air + "</th><th>" + recordList[i].luminous + "</th><th>" + result.args.name + "</th></tr>");
+                      window.scrollTo(0, document.body.scrollHeight);
+                      flag = 0;
+                      break;
+                    }
+                  }
+                  if(flag){
+                    $('#messages').append("<tr><th scope=\"row\"><img src=\"error.svg\" width=\"50%\" height=\"10%\"></th><th>Missing Data</th><th>Missing Data</th><th>Missing Data</th><th>Missing Data</th><th>Missing Data</th><th>" + result.args.name + "</th></tr>");
+                      window.scrollTo(0, document.body.scrollHeight);
+                  }
                 } else {
                     
                     console.log(error);
