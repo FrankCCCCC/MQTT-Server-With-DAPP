@@ -21,10 +21,19 @@ var client  = mqtt.connect('mqtt://127.0.0.1');
 
 client.on('connect', function () {//When client connect to broker
   client.subscribe('presence');
+  client.subscribe('data');
   console.log("Subscribe");
   client.publish('presence', 'Hello mqtt');
   client.publish('presence', 'Second Hello mqtt');
+
   console.log("Published");
+  
+  var i = 0;
+  setInterval(()=>{
+    client.publish('presence', i + '. Hello mqtt');
+    console.log(i + '. Hello mqtt');
+    i++;
+  }, 1000);
 });
 
 var msg = "";
@@ -36,7 +45,7 @@ client.on('message', function (topic, message) {//When Recive message
   sio.emit('chat message', message.toString());
   console.log("After emit: " + message.toString());
 
-  client.end();
+  //client.end();
 });
 
 //Socket.io firer
