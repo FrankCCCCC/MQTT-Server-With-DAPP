@@ -1,65 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-
-    <link rel="stylesheet" type="text/css" href="main.css">
-
-    <script src="./node_modules/web3/dist/web3.min.js"></script>
-
-</head>
-<body>
-    <div class="container">
-
-        <h1>Info Contract</h1>
-
-        <h2 id="info"></h2>
-
-        <label for="name" class="col-lg-2 control-label">Name</label>
-        <input id="name" type="text">
-
-        <label for="name" class="col-lg-2 control-label">Age</label>
-        <input id="age" type="text">
-
-        <button id="button">Update Info</button>
-
-
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      #messages { margin-bottom: 40px }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
-       if (typeof web3 !== 'undefined') {
-            web3 = new Web3(web3.currentProvider);
-        } else {
-            // set the provider you want from Web3.providers
-            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
-        }
-
-        web3.eth.defaultAccount = web3.eth.accounts[0];
-
-        var infoContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"getInfo","outputs":[{"name":"","type":"string"},{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_fName","type":"string"},{"name":"_age","type":"uint256"}],"name":"setInfo","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
-
-        var info = infoContract.at('0x8cdaf0cd259887258bc13a92c0a6da92698644c0');
-
-        info.getInfo(function(error, result){
-            if(!error)
-                {
-                    $("#info").html(result[0]+' ('+result[1]+' years old)');
-                    console.log(result);
-                }
-            else
-                console.error(error);
+      $(function () {
+        var socket = io();
+        $('form').submit(function(){
+          socket.emit('chat message', $('#m').val());
+          $('#m').val('');
+          return false;
         });
-
-        $("#button").click(function() {
-            info.setInfo($("#name").val(), $("#age").val());
+        socket.on('chat message', function(msg){
+          $('#messages').append($('<li>').text(msg));
+          window.scrollTo(0, document.body.scrollHeight);
         });
-
+      });
     </script>
-
-</body>
+  </body>
 </html>

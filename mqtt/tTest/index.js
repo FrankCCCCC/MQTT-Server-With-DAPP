@@ -1,9 +1,10 @@
 //Socket.io and HTTP Server
-var app = require('express')();
+const express = require('express');
+var app = express();
 var http = require('http').Server(app); //Create Node Server
-var io = require('socket.io')(http);
+var sio = require('socket.io')(http);
 //const socketIo = require('socket.io-client');
-var socketIo = io("http://localhost:4000/");
+
 var port = process.env.PORT || 4000;
 http.listen(port, function(){
   console.log('listening on *:' + port);
@@ -22,22 +23,27 @@ client.on('connect', function () {//When client connect to broker
   client.subscribe('presence');
   console.log("Subscribe");
   client.publish('presence', 'Hello mqtt');
+  client.publish('presence', 'Second Hello mqtt');
   console.log("Published");
 });
 
+var msg = "";
+
 client.on('message', function (topic, message) {//When Recive message
   // message is Buffer
+  msg = message.toString();
   console.log(message.toString())
-  io.sockets.emit('chat message', message.toString());
-  console.log(message.toString());
+  sio.emit('chat message', message.toString());
+  console.log("After emit: " + message.toString());
 
-  client.end()
-})
+  client.end();
+});
 
 //Socket.io firer
-io.on('connection', function(socket){
-  socket.on('chat message', function(message){
-    io.emit('chat message', message);
-    console.log(message);
-  });
+sio.on('connection', function(socket){
+  //socket.on('chat message', function(message){
+    sio.emit('chat message', msg);
+    console.log(msg);
+    msg = "";
+  //});
 });
