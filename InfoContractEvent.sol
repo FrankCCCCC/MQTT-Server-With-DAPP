@@ -20,3 +20,4 @@ contract InfoContract {
        return (fName, age);
    }   
 }
+// Use Remix to compile Solidity to generate ABI
