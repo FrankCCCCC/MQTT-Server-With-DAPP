@@ -39,7 +39,6 @@
               </tr>
             </thead>
             <tbody id="messages">
-              
             </tbody>
       </table>
 
@@ -48,15 +47,19 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script type="text/javascript" src="./node_modules/crypto-js/crypto-js.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script> -->
     <script>
       $(document).ready(function(){
-        if (typeof web3 !== 'undefined') {
+        /*if (typeof web3 !== 'undefined') {
             web3 = new Web3(web3.currentProvider);
-        } else {
+            console.log("Set Current Provider");
+            console.log(web3.currentProvider);
+        } else {*/
             // set the provider you want from Web3.providers
             // Listen to Private Chain at localhost://7545 ( Using Ganache )
             web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
-        }
+            console.log("Set Web3");
+        // }
 
         web3.eth.defaultAccount = web3.eth.accounts[0];
 
@@ -119,7 +122,7 @@
 	}
 ]);
         //Delploy Contract at adress
-        var info = infoContract.at('0x25ffdcd502be2cd985c977add95d1f45bbbc30d7');
+        var info = infoContract.at('0x25fFdCd502BE2cD985C977add95d1F45bBbC30d7');
 
         var instructorEvent = info.Instructor();
 
@@ -136,6 +139,7 @@
           //$('#messages').append($('<li>').text(msg));
           var hash = CryptoJS.SHA256(msg).toString();
           // If gas ran out set hash to "mag", save, and reset webpage. Then set argument back to hash
+          console.log(hash);
           info.setInfo(hash, 0);
           var dataObj = JSON.parse(msg);
           dataObj.hash = hash;
@@ -151,18 +155,17 @@
                   var flag = 1;
                   for(var i=recordList.length-1; i>=0; i--){
                     if(result.args.name === recordList[i].hash){
-                      $('#messages').append("<tr><th scope=\"row\"><img src=\"correct.svg\" width=\"50%\" height=\"10%\"></th><th>"+recordList[i].time+"</th><th>" + recordList[i].humid + "</th><th>" + recordList[i].temp + "</th><th>" + recordList[i].air + "</th><th>" + recordList[i].luminous + "</th><th>" + result.args.name + "</th></tr>");
+                      $('#messages').append("<tr><th scope=\"row\"><img src=\"check.svg\" height=\"10%\" width=\"50%\"></th><th>"+recordList[i].time+"</th><th>" + recordList[i].humid + "</th><th>" + recordList[i].temp + "</th><th>" + recordList[i].air + "</th><th>" + recordList[i].luminous + "</th><th>" + result.args.name + "</th></tr>");
                       window.scrollTo(0, document.body.scrollHeight);
                       flag = 0;
                       break;
                     }
                   }
                   if(flag){
-                    $('#messages').append("<tr><th scope=\"row\"><img src=\"error.svg\" width=\"50%\" height=\"10%\"></th><th>Missing Data</th><th>Missing Data</th><th>Missing Data</th><th>Missing Data</th><th>Missing Data</th><th>" + result.args.name + "</th></tr>");
-                      window.scrollTo(0, document.body.scrollHeight);
+                    // $('#messages').append("<tr><th scope=\"row\"><img src=\"close.svg\" height=\"10%\" width=\"50%\"></th><th>Missing Data</th><th>Missing Data</th><th>Missing Data</th><th>Missing Data</th><th>Missing Data</th><th>" + result.args.name + "</th></tr>");
+                    window.scrollTo(0, document.body.scrollHeight);
                   }
                 } else {
-                    
                     console.log(error);
                 }
         });
